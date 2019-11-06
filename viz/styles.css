@@ -1,0 +1,8 @@
+div.node-div {
+	/* background-image: url('./output.png'); */
+	display: inline;
+	float: left;
+}
+div.node-div h1 {
+	text-align: center;
+}

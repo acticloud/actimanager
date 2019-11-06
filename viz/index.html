@@ -1,0 +1,58 @@
+<html>
+
+<head>
+<title>ACTiCLOUD bigLITTLE cpu mapping</title>
+<link rel="stylesheet" href="styles.css">
+
+<script type="text/javascript">
+function refresh(node)
+{
+  var times = 3000; // gap in Milli Seconds;
+  (function startRefresh() {
+    var address;
+    if(node.src.indexOf('?')>-1)
+      address = node.src.split('?')[0];
+    else 
+      address = node.src;
+    node.src = address+"?time="+new Date().getTime();
+    setTimeout(startRefresh, times);
+  })();
+}
+window.onload = function()
+{
+  var node = document.getElementById('node1-img');
+  refresh(node);
+  var node = document.getElementById('node2-img');
+  refresh(node);
+  var node = document.getElementById('node3-img');
+  refresh(node);
+  var node = document.getElementById('node4-img');
+  refresh(node);
+}
+</script>
+</head>
+
+<body>
+<div class="node-div">
+<h1>Compute-1</h1>
+<img src="./images/output-acticloud1.png" id="node1-img">
+</div>
+
+<div class="node-div">
+<h1 style="text-align: center">Compute-2</h1>
+<img src="./images/output-acticloud2.png" id="node2-img">
+</div>
+
+<div class="node-div">
+<h1 style="text-align: center">Compute-3</h1>
+<img src="./images/output-acticloud3.png" id="node3-img">
+</div>
+
+<div class="node-div">
+<h1 style="text-align: center">Compute-4</h1>
+<img src="./images/output-acticloud4.png" id="node4-img">
+</div>
+
+</body>
+
+</html>

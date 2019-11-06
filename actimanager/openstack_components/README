@@ -1,0 +1,21 @@
+This folder contains the necessary files to incorporate the ACTiCLOUD
+philosophy inside Openstack.
+
+*** nova-scheduler
+
+To enhance nova-scheduler's filter scheduler with ACTiCLOUD's filters and
+weights the following steps are necessary:
+
+- Copy filters/* in /usr/lib/python2.7/dist-packages/nova/scheduler/filters
+- Copy weights/* in /usr/lib/python2.7/dist-packages/nova/scheduler/weights
+- Add the following lines in /etc/nova/nova.conf
+  available_filters = nova.scheduler.filters.all_filters
+  available_filters = nova.scheduler.filters.acticloud_filter.ActicloudFilter
+  available_filters = nova.scheduler.filters.acticloud_lab_filter.ActicloudLabFilter
+
+  enabled_filters = ActicloudLabFilter
+
+  weight_classes = nova.scheduler.weights.all_weighers
+  weight_classes = nova.scheduler.weights.acticloud_lab.ActicloudLabWeigher
+- Restart nova-scheduler service
+- Enjoy your new ACTiCLOUD-enabled Openstack nova-scheduler

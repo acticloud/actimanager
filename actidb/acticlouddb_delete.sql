@@ -1,0 +1,10 @@
+USE acticloudDB;
+DROP TABLE hosts;
+DROP TABLE vms;
+DROP TABLE healthy_state_models;
+DROP TABLE bench_isolation_performance;
+DROP TABLE bench_isolation_perf_metrics;
+DROP TABLE vm_heartbeats;
+DROP TABLE external_profit_reports;
+DROP TABLE internal_profit_reports;
+DROP DATABASE acticloudDB;

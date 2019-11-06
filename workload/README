@@ -1,0 +1,5 @@
+To generate a workload file run the following command:
+$ python generate.py > workload.txt
+
+To execute a workload run the following command:
+$ python execute.py workload.txt

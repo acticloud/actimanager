@@ -1,0 +1,7 @@
+* nova_compute_fix_base_image_file_nfs_error.patch
+This patch fixes the Permission Denied error when running utime() for a base
+file that resides on an NFS filesystem.
+Apply it to /usr/lib/python2.7/dist-packages/nova/virt/libvirt/imagebackend.py by:
+$ cp /usr/lib/python2.7/dist-packages/nova/virt/libvirt/imagebackend.py /usr/lib/python2.7/dist-packages/nova/virt/libvirt/imagebackend.py.original
+$ patch /usr/lib/python2.7/dist-packages/nova/virt/libvirt/imagebackend.py.original -i nova_compute_fix_base_image_file_nfs_error.patch -o /usr/lib/python2.7/dist-packages/nova/virt/libvirt/imagebackend.py
+$ /etc/init.d/nova-compute restart

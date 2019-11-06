@@ -1,0 +1,31 @@
+18a19
+> import errno
+52a54,66
+> ## NOTE(jimsiak): Added this here to avoid hitting the Permission denied
+> ## error when calling utime in the base image file on NFS systems.
+> ## See also: https://bugs.launchpad.net/nova/+bug/1809123
+> ## See also: https://review.opendev.org/#/c/633493/
+> def _update_utime_ignore_eacces(path):
+>     try:
+>         nova.privsep.path.utime(path)
+>     except OSError as e:
+>         with excutils.save_and_reraise_exception(logger=LOG) as ctxt:
+>             if e.errno == errno.EACCES:
+>                 LOG.warning("Ignoring failure to update utime of %(path)s: "
+>                             "%(error)s", {'path': path, 'error': e})
+>                 ctxt.reraise = False
+545c559,560
+<             nova.privsep.path.utime(base)
+---
+> #            nova.privsep.path.utime(base)
+>             _update_utime_ignore_eacces(base)
+601c616,617
+<         nova.privsep.path.utime(base)
+---
+> #        nova.privsep.path.utime(base)
+>         _update_utime_ignore_eacces(base)
+1096c1112,1113
+<                 nova.privsep.path.utime(base)
+---
+> #                nova.privsep.path.utime(base)
+>                 _update_utime_ignore_eacces(base)
