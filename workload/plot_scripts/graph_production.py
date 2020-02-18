@@ -13,7 +13,6 @@ import Billing
 
 ########################################## Configuration ##########################################
 
-paragka = 0.05
 home_dir = '/'.join(os.getcwd().split('/')[:4]) + '/'
 # Load and save directories
 load_dir = home_dir + 'workload/results/plot_inputs/'
@@ -39,7 +38,7 @@ def batch(slowdown):
 
 def userfacing(gold, slowdown):
 	if gold:
-		return gold_m if slowdown < Billing.gold_tolerate + paragka else 0.0
+		return gold_m if slowdown < Billing.gold_tolerate else 0.0
 	return silver_m if slowdown < Billing.silver_tolerate else 0.0
 
 # Base perfs for benchmarks. Fill in any missing benchmarks
