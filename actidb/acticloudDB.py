@@ -68,6 +68,18 @@ class ActiCloudDBClient():
 			self.connection.commit()
 			result = cursor.fetchall()
 			return result
+	def insert_host(self, host):
+		'''
+		@param host: tupple (name, nvcpus, RAM (GB), is_lab)
+		'''
+		self._reconnect_if_lost()
+		with self.connection.cursor() as cursor:
+			sql = """INSERT INTO `hosts`
+			       (`name`, `nr_pcpus`, `ram_gb`, `is_lab`)
+			        VALUES (%s, %s, %s, %s)"""
+			cursor.execute(sql, (host[0], host[1], host[2], host[3]))
+			self.connection.commit()
+
 	def insert_vm(self, vm_uuid, hostname, nr_vcpus, is_gold, is_noisy,
 	              is_sensitive, cost_function):
 		self._reconnect_if_lost()

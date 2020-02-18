@@ -1,3 +1,8 @@
+## The set of compute nodes
+## Each entry is of the form (name, nvcpus, RAM (GB), is_lab)
+OPENSTACK_HOSTS = [ ("acticloud1", 20, 256, 1), ("acticloud2", 20, 256, 0),
+                    ("acticloud3", 20, 256, 0), ("acticloud4", 20, 256, 0) ]
+
 ## Credentials to access the acticloud MySQL database
 ACTICLOUDDB_HOSTNAME = "localhost"
 ACTICLOUDDB_USERNAME = "root"

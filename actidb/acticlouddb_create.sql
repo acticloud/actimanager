@@ -3,10 +3,11 @@
  **/
 CREATE DATABASE acticloudDB;
 USE acticloudDB;
-CREATE TABLE hosts ( id varchar(50) not null unique,
+CREATE TABLE hosts ( id int not null unique auto_increment,
                      name varchar(50),
                      nr_pcpus smallint unsigned,
-                     ram_gb int unsigned );
+                     ram_gb int unsigned,
+                     is_lab tinyint unsigned );
 CREATE TABLE vms ( id varchar(50) not null unique,
                    hostname varchar(50),
                    nr_vcpus smallint unsigned,
@@ -15,7 +16,7 @@ CREATE TABLE vms ( id varchar(50) not null unique,
                    is_gold tinyint unsigned,
                    is_noisy tinyint unsigned,
                    is_sensitive tinyint unsigned,
-                   cost_function tinyint unsigned);
+                   cost_function tinyint unsigned );
 CREATE TABLE healthy_state_models ( bench_name varchar(50),
                                     nr_vcpus smallint unsigned,
                                     model longblob );
