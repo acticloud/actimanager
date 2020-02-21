@@ -21,13 +21,20 @@ INTERFERENCE_DETECTION_ENABLED = False
 interference_cnt_lim = 5
 decision_period = 30
 
+UVISOR = False
+
 class ACTiManagerInternal():
 	def __init__(self, poll_period, compute_node_name, system_type):
 		self.logger = logging.getLogger(self.__class__.__name__)
 
-		self.information_aggregator = InformationAggregator(compute_node_name, system_type)
+		if UVISOR:
+			self.information_aggregator = uvisorInformationAggregator(compute_node_name, system_type)
+			self.decision_maker = uvisorDecisionMaker(self.information_aggregator, compute_node_name)
+		else:
+			self.information_aggregator = InformationAggregator(compute_node_name, system_type)
+			self.decision_maker = DecisionMaker(self.information_aggregator, compute_node_name)
+
 		self.modeler = Modeler(compute_node_name, self.information_aggregator)
-		self.decision_maker = DecisionMaker(self.information_aggregator, compute_node_name)
 		self.poll_period = poll_period
 		self.compute_node = compute_node_name
 
@@ -260,8 +267,11 @@ class DecisionMaker():
 					if ret == False:
 						break
 			else:
-				for i, dst in enumerate(move[1]):
-					ret = self.pin_vcpu(vm_to_move, i, [dst])
+				for vcpu, dst in enumerate(move[1]):
+					if UVISOR:
+						ret = self.pin_vcpu(vm_to_move, vcpu, dst)
+					else:
+						ret = self.pin_vcpu(vm_to_move, vcpu, [dst])
 					if ret == False:
 						break
 
