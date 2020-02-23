@@ -2,6 +2,7 @@
 
 import logging
 import libvirt
+import subprocess
 
 
 class LibVirtConnection(object):
@@ -87,6 +88,12 @@ class LibVirtInstance(object):
 
     def get_instance_mapping(self):
         return self._libvirt_domain.vcpuPinInfo()
+
+    def attach_device(self, xml):
+	# FIXME: This used to be a Python API call. Switched to virsh to debug
+	# the hotplug issues. Now that these are resolved, this could revert
+	# back to the Python API.
+	subprocess.call("virsh attach-device --domain %s --live ./user-net.xml" % self._libvirt_domain.ID(), shell=True)
 
 def main(argv):
     if (len(argv) < 2):

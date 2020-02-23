@@ -2,6 +2,7 @@ import logging, sys, numa
 import pika, time, pytz
 from datetime import datetime, timedelta
 from enum import *
+import threading
 
 from System import *
 from ActiManagerSystem import ActiManagerSystem
@@ -85,7 +86,14 @@ class Modeler():
 			if vm.status != "ACTIVE":
 				self.logger.info("VM is not ACTIVE (it is %s), moving on to the next", vm.status)
 				continue
-			if vm.id not in system.vms:
+			nr_vcpus = self.information_aggregator.get_vm_nr_vcpus(vm)
+			# FIXME: resize check only works for vcpu changes atm
+			if vm.id not in system.vms or nr_vcpus != len(system.vms[vm.id].vcpus):
+				try:
+					system.deleteVM(vm.id)
+				except:
+					pass
+
 				nr_vcpus = self.information_aggregator.get_vm_nr_vcpus(vm)
 				cpu_util = self.information_aggregator.get_cpu_util(vm)
 				is_gold = self.information_aggregator.is_gold_vm(vm)
@@ -104,6 +112,23 @@ class Modeler():
 				ret = True
 		if (len(new_vms) > 0):
 			return_val['new_vm_list'] = list(new_vms)
+
+			# FIXME: workaround the network limitations of current kMAX setup, by hotplugging a SLIRP interface post-boot
+			def attach_helper():
+				# FIXME: ugly workaround for the fact that early boot pci hotplug doesn't work reliably
+				time.sleep(30)
+				for vm in new_vms:
+				try:
+					libvirt_instance_name = getattr(vm.openstack, 'OS-EXT-SRV-ATTR:instance_name')
+					with libvirt_client.LibVirtConnection(self.information_aggregator.hostname, "qemu+ssh") as libvconn:
+						libvinstance = libvirt_client.LibVirtInstance(libvconn, str(libvirt_instance_name))
+						libvinstance.attach_device("")
+				except Exception as e:
+					self.logger.info("=================> Could not attach slirp nic for vm %s (%s)", vm.id, e)
+
+			t = threading.Thread(target=attach_helper)
+			t.start()
+
 		return ret
 
 	def removedVmCheck(self, return_val, node_state):
@@ -410,14 +435,15 @@ class InformationAggregator():
 		self.compute_node_name = compute_node_name
 
 		self.system_type = system_type
+		# FIXME: make hardware topology tunable
 		if system_type == "actistatic" or system_type == "actifull":
 			if system_type == "actifull":
 				INTERFERENCE_DETECTION_ENABLED = True
-			self.system = ActiManagerSystem([2, 1, 10], compute_node_name)
+			self.system = ActiManagerSystem([2, 1, 4], compute_node_name)
 		elif system_type == "gps":
-			self.system = GoldPerSocketSystem([2, 1, 10], compute_node_name)
+			self.system = GoldPerSocketSystem([2, 1, 4], compute_node_name)
 		elif system_type == "gno":
-			self.system = GoldNotOversubscribedSystem([2, 1, 10], compute_node_name)
+			self.system = GoldNotOversubscribedSystem([2, 1, 4], compute_node_name)
 		else:
 			self.logger.error("Wrong system_type given: %s", system_type)
 			sys.exit(1)
@@ -447,6 +473,9 @@ class InformationAggregator():
 		return pid
 
 	def get_dst_numa_node_from_pcpu(self, pcpu_id):
+		# FIXME: numa module doesn't work on KMAX big.LITTLE platform
+		return 0 if pcpu_id < 4 else 1
+
 		#module numa has not implemented numa_node_of_cpu() call of numa(3) library
 		for i in range(0, numa.get_max_node() + 1):
 			if pcpu_id in numa.node_to_cpus(i):

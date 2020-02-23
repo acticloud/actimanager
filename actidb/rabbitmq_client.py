@@ -37,6 +37,9 @@ class NotificationsDump(ConsumerMixin):
 		self.acticloudDBClient.set_vm_attribute(vm_uuid, "hostname", new_host)
 		self.acticloudDBClient.inc_vm_attribute(vm_uuid, "no_migrations")
 
+	def db_resize_vm(self, vm_uuid, flavor_id):
+		self.acticloudDBClient.resize_vm(vm_uuid, flavor_id)
+
 	def get_consumers(self, consumer, channel):
 		exchange = Exchange(EXCHANGE_NAME, type="topic", durable=False)
 		queue = Queue(QUEUE_NAME, exchange, routing_key = ROUTING_KEY,\
@@ -77,6 +80,13 @@ class NotificationsDump(ConsumerMixin):
 			hostname = json_body["payload"]["host"]
 			logger.info("VM %s MIGRATED TO %s" % (vm_uuid, hostname))
 			self.db_update_vm_migration(vm_uuid, hostname)
+		elif (event_type == "compute.instance.resize.confirm.end"):
+			logger.info("resize confirm response: %s", json_body["payload"])
+			vm_uuid = json_body["payload"]["instance_id"]
+			# FIXME: get flavor
+			#flavor_id = json_body["payload"]["flavor_id"]
+			flavor_id = 1002
+			self.db_resize_vm(vm_uuid, flavor_id)
 		elif (event_type == "compute.instance.update"):
 			host_id = ""
 		else:

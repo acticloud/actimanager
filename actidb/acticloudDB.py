@@ -114,6 +114,9 @@ class ActiCloudDBClient():
 			self.connection.commit()
 			result = cursor.fetchone()
 
+	def resize_vm(self, vm_uuid, flavor_id):
+		# FIXME: add flavor to table, or correctly update nr_cpus from flavor
+		self.set_vm_attribute(vm_uuid, "nr_cpus", 2)
 
 	def get_nr_gold_vms_by_hostname(self, hostname):
 		self._reconnect_if_lost()

@@ -19,7 +19,10 @@ class ActiManagerSystem(BaseSystem):
 	def GenerateTree(self, shape, node):
 		for i in range(shape[0]):
 			if len(shape) == 1:
-				core = Core(len([x for x in self.tree.leaves if isinstance(x, Core)]), parent=node)
+				coreid = len([x for x in self.tree.leaves if isinstance(x, Core)])
+				# adjust slowdown, 2x for silver cores
+				slowdown = 1 if coreid > 4 else 2
+				core = Core(coreid, slowdown, parent=node)
 			else:
 				child = Node("L" + str(len(shape)) + "." + \
 						str(len([x for x in self.tree.leaves if isinstance(x,Core)])), parent=node)
@@ -154,7 +157,8 @@ class ActiManagerSystem(BaseSystem):
 	# groups: List[(Core,..)], vcpus: List[Vcpu], excluded: List[Core] -> (Core,..)
 	def gold_dst_decide(self, groups_input, vcpus, excluded = []):
 		groups = list()
-		for group in groups_input:
+		# reverse the groups_input list, to give priority to the big cores, at the end of the list
+		for group in reversed(groups_input):
 			(silver_moved, gold_moved) = (0,0)
 			for core in group:
 				silver_moved += len([v for v in core.children if not v.is_gold])
